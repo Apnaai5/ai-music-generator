@@ -1,12 +1,88 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>AI Music Generator</title>
+<meta charset="UTF-8">
+<title>Apna AI Music Generator</title>
+<style>
+body{
+  font-family: Arial;
+  background:#020617;
+  color:white;
+  text-align:center;
+  padding:40px;
+}
+button,select{
+  padding:14px 22px;
+  font-size:16px;
+  border:none;
+  border-radius:8px;
+  margin:10px;
+}
+button{
+  background:#22c55e;
+  cursor:pointer;
+}
+audio{
+  margin-top:20px;
+}
+</style>
 </head>
-<body>
-  <h1>Welcome to AI Music Generator</h1>
-  <p>यह वेबसाइट AI से copyright-free music बनाएगी।</p>
 
-  <button>Generate Music</button>
+<body>
+
+<h1>🎧 Apna AI Music Generator</h1>
+<p>Generate random copyright-free music</p>
+
+<select id="style">
+  <option value="lofi">Lofi</option>
+  <option value="cinematic">Cinematic</option>
+  <option value="relax">Relax</option>
+</select>
+
+<br>
+
+<button onclick="generateMusic()">Generate Music</button>
+
+<br>
+<audio id="player" controls></audio>
+
+<br><br>
+<a id="download" download>
+<button>Download Music</button>
+</a>
+
+<p style="font-size:14px;margin-top:30px;">
+All music generated here is royalty-free.
+</p>
+
+<script>
+const music = {
+  lofi:[
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+  ],
+  cinematic:[
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
+  ],
+  relax:[
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
+  ]
+};
+
+function generateMusic(){
+  const style = document.getElementById("style").value;
+  const list = music[style];
+  const random = list[Math.floor(Math.random()*list.length)];
+  const player = document.getElementById("player");
+  const download = document.getElementById("download");
+
+  player.src = random;
+  download.href = random;
+  player.play();
+}
+</script>
+
 </body>
 </html>
