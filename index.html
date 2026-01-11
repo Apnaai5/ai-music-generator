@@ -1,86 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
-<title>Apna AI Music Generator</title>
+<title>AI Music Generator – Beat Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body{
-  font-family: Arial;
+  margin:0;
   background:#020617;
   color:white;
-  text-align:center;
-  padding:40px;
+  font-family:Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
-button,select{
-  padding:14px 22px;
-  font-size:16px;
+.box{
+  background:#0f172a;
+  padding:20px;
+  border-radius:15px;
+  width:90%;
+  max-width:420px;
+  text-align:center;
+}
+select,button{
+  margin-top:12px;
+  padding:12px;
+  width:100%;
+  border-radius:10px;
   border:none;
-  border-radius:8px;
-  margin:10px;
+  font-size:15px;
 }
 button{
-  background:#22c55e;
+  background:#00ffcc;
+  font-weight:bold;
   cursor:pointer;
 }
-audio{
-  margin-top:20px;
+#status{
+  margin-top:10px;
+  font-size:14px;
+  color:#7fffd4;
 }
+small{opacity:0.7;}
 </style>
 </head>
 
 <body>
 
-<h1>🎧 Apna AI Music Generator</h1>
-<p>Generate random copyright-free music</p>
+<div class="box">
+  <h2>🎵 AI Music Generator</h2>
+  <small>Music + Beat (Copyright-Free)</small>
 
-<select id="style">
-  <option value="lofi">Lofi</option>
-  <option value="cinematic">Cinematic</option>
-  <option value="relax">Relax</option>
-</select>
+  <select id="mode">
+    <option value="lofi">🎧 Lofi Beat</option>
+    <option value="chill">🌊 Chill Beat</option>
+    <option value="edm">🔥 EDM Beat</option>
+  </select>
 
-<br>
+  <select id="length">
+    <option value="10">⏱ 10 Seconds</option>
+    <option value="30">⏱ 30 Seconds</option>
+    <option value="60">⏱ 60 Seconds</option>
+  </select>
 
-<button onclick="generateMusic()">Generate Music</button>
+  <button onclick="generate()">Generate Music</button>
+  <button onclick="download()">Download Music</button>
 
-<br>
-<audio id="player" controls></audio>
-
-<br><br>
-<a id="download" download>
-<button>Download Music</button>
-</a>
-
-<p style="font-size:14px;margin-top:30px;">
-All music generated here is royalty-free.
-</p>
+  <div id="status"></div>
+</div>
 
 <script>
-const music = {
-  lofi:[
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-  ],
-  cinematic:[
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-  ],
-  relax:[
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
-    "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3"
-  ]
-};
+let audioBuffer;
+let currentMode="music";
 
-function generateMusic(){
-  const style = document.getElementById("style").value;
-  const list = music[style];
-  const random = list[Math.floor(Math.random()*list.length)];
-  const player = document.getElementById("player");
-  const download = document.getElementById("download");
+function generate(){
+  const ctx=new AudioContext();
+  const duration=Number(document.getElementById("length").value);
+  const rate=ctx.sampleRate;
+  const buffer=ctx.createBuffer(1,rate*duration,rate);
+  const data=buffer.getChannelData(0);
+  const mode=document.getElementById("mode").value;
+  currentMode=mode;
 
-  player.src = random;
-  download.href = random;
-  player.play();
+  let baseFreq=180;
+  let beatFreq=2;
+
+  if(mode==="chill"){baseFreq=240;beatFreq=1.5;}
+  if(mode==="edm"){baseFreq=440;beatFreq=4;}
+
+  for(let i=0;i<data.length;i++){
+    const t=i/rate;
+    const melody=Math.sin(2*Math.PI*baseFreq*t);
+    const beat=Math.sin(2*Math.PI*beatFreq*t)>0?0.6:0.1;
+    data[i]=(melody*beat)*Math.exp(-t/duration);
+  }
+
+  const src=ctx.createBufferSource();
+  src.buffer=buffer;
+  src.connect(ctx.destination);
+  src.start();
+
+  audioBuffer=buffer;
+  document.getElementById("status").innerText=
+  "✅ Ready: "+mode.toUpperCase()+" BEAT";
+}
+
+function download(){
+  if(!audioBuffer)return;
+  const wav=encodeWAV(audioBuffer.getChannelData(0));
+  const blob=new Blob([wav],{type:"audio/wav"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="AI_"+currentMode+"_Beat_"+Date.now()+".wav";
+  a.click();
+}
+
+function encodeWAV(samples){
+  const buffer=new ArrayBuffer(44+samples.length*2);
+  const view=new DataView(buffer);
+  const rate=44100;
+  function w(o,s){for(let i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i));}
+  w(0,"RIFF");
+  view.setUint32(4,36+samples.length*2,true);
+  w(8,"WAVE");
+  w(12,"fmt ");
+  view.setUint32(16,16,true);
+  view.setUint16(20,1,true);
+  view.setUint16(22,1,true);
+  view.setUint32(24,rate,true);
+  view.setUint32(28,rate*2,true);
+  view.setUint16(32,2,true);
+  view.setUint16(34,16,true);
+  w(36,"data");
+  view.setUint32(40,samples.length*2,true);
+  let o=44;
+  for(let i=0;i<samples.length;i++){
+    let s=Math.max(-1,Math.min(1,samples[i]));
+    view.setInt16(o,s<0?s*0x8000:s*0x7fff,true);
+    o+=2;
+  }
+  return view;
 }
 </script>
 
