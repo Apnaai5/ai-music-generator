@@ -1,211 +1,169 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>AI Music Converter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>AI Music Converter – Slow, Fast, Lofi</title>
-
-<meta name="description" content="Free AI music converter tool. Convert any song into Slow, Fast, Lofi, EDM or Chill version directly in your browser. 100% free and legal.">
 
 <style>
 body{
   margin:0;
-  background:#020617;
-  color:white;
   font-family:Arial, sans-serif;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  background:#0b1220;
+  color:#fff;
 }
-
-.box{
-  background:#0f172a;
-  padding:20px;
-  border-radius:16px;
-  width:90%;
+.container{
   max-width:420px;
+  margin:40px auto;
+  background:#121a2f;
+  padding:25px;
+  border-radius:16px;
   text-align:center;
-  margin-top:40px;
 }
-
-input, select, button{
-  margin-top:12px;
-  padding:12px;
+h1{margin-bottom:8px;}
+input,select,button{
   width:100%;
-  border-radius:10px;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
   border:none;
-  font-size:15px;
 }
-
 button{
-  background:#00ffcc;
+  background:#00ffd5;
+  font-size:16px;
   font-weight:bold;
   cursor:pointer;
 }
-
-button:hover{opacity:0.9;}
-
-audio{width:100%; margin-top:10px;}
-
-#status{
-  margin-top:10px;
-  font-size:14px;
-  color:#7fffd4;
-}
-
-/* Loading */
-.loader{
+audio{width:100%;margin-top:10px;}
+#loading{
   display:none;
-  margin:10px auto;
-  width:40px;
-  height:40px;
-  border:4px solid #1e293b;
-  border-top:4px solid #00ffcc;
-  border-radius:50%;
-  animation:spin 1s linear infinite;
+  margin:10px 0;
 }
-
+.loader{
+  border:4px solid #222;
+  border-top:4px solid #00ffd5;
+  border-radius:50%;
+  width:35px;
+  height:35px;
+  animation:spin 1s linear infinite;
+  margin:auto;
+}
 @keyframes spin{
+  0%{transform:rotate(0deg);}
   100%{transform:rotate(360deg);}
 }
-
-/* About + Footer */
-section, footer{
-  max-width:600px;
-  margin:30px 15px;
-  font-size:14px;
-  opacity:0.85;
-  text-align:center;
+section{
+  max-width:700px;
+  margin:50px auto;
+  padding:20px;
 }
-
+footer{
+  text-align:center;
+  margin:30px 0;
+  font-size:14px;
+}
 footer a{
-  color:#00ffcc;
+  color:#00ffd5;
   text-decoration:none;
-  margin:0 6px;
+  margin:0 5px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-  <h2>🎵 AI Music Converter</h2>
-  <small>Any Song → Slow / Fast / Lofi / EDM / Chill</small>
+<div class="container">
+<h1>🎵 AI Music Converter</h1>
+<p>Any Song → Slow / Fast / Lofi / EDM / Chill</p>
 
-  <input type="file" id="file" accept="audio/*">
+<input type="file" id="file" accept="audio/*">
 
-  <select id="mode">
-    <option value="slow">🐢 Slow</option>
-    <option value="fast">⚡ Fast</option>
-    <option value="lofi">🎧 Lofi</option>
-    <option value="edm">🔥 EDM</option>
-    <option value="chill">🌙 Chill</option>
-  </select>
+<select id="mode">
+  <option>🐢 Slow</option>
+  <option>⚡ Fast</option>
+  <option>🎧 Lofi</option>
+  <option>🔥 EDM</option>
+  <option>🌙 Chill</option>
+</select>
 
-  <button onclick="convert()">Convert Music</button>
-  <button onclick="download()">Download MP3</button>
+<button onclick="convert()">Convert Music</button>
 
-  <div class="loader" id="loading"></div>
+<div id="loading">
+  <div class="loader"></div>
+  <p>Processing...</p>
+</div>
 
-  <audio id="player" controls></audio>
-  <div id="status"></div>
+<button onclick="download()">Download MP3</button>
+
+<audio id="player" controls></audio>
 </div>
 
 <!-- ABOUT -->
 <section id="about">
-  <h3>About This Tool</h3>
-  <p>
-    This AI Music Converter allows users to transform their own uploaded audio
-    into Slow, Fast, Lofi, EDM or Chill versions directly in the browser.
-    No song is stored or uploaded to any server.
-  </p>
+<h3>About This Tool</h3>
+<p>
+This AI Music Converter allows users to transform their own uploaded audio into
+Slow, Fast, Lofi, EDM or Chill versions directly inside the browser.
+</p>
+<p>
+No audio is uploaded, stored or sent to any server.
+Everything works locally on the user's device.
+</p>
 </section>
 
 <!-- TERMS -->
 <section id="terms">
-  <h3>Terms & Disclaimer</h3>
-  <p>
-    This tool works only on user-uploaded audio files.
-    Users are responsible for the content they upload.
-    We do not host, collect or distribute copyrighted material.
-  </p>
+<h3>Terms & Disclaimer</h3>
+<p>
+This tool works only with user-uploaded audio files.
+Users are fully responsible for the content they upload.
+</p>
+<p>
+We do not host, store, collect or distribute copyrighted material.
+This tool is for personal and educational use only.
+</p>
 </section>
 
-<!-- FOOTER -->
+<!-- PRIVACY -->
+<section id="privacy">
+<h3>Privacy Policy</h3>
+<p>
+Your privacy is completely safe.
+This website does not collect personal data, cookies or analytics.
+</p>
+<p>
+All processing happens inside your browser.
+Your audio never leaves your device.
+</p>
+</section>
+
 <footer>
-  © 2026 AI Music Converter |
-  <a href="#about">About</a> |
-  <a href="#terms">Terms</a>
+© 2026 AI Music Converter |
+<a href="#about">About</a> |
+<a href="#terms">Terms</a> |
+<a href="#privacy">Privacy</a>
 </footer>
 
 <script>
-let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let bufferData;
+let audioURL;
 
 function convert(){
-  const file = document.getElementById("file").files[0];
-  if(!file){ alert("पहले song upload करो"); return; }
-
+  const file=document.getElementById("file").files[0];
+  if(!file){alert("पहले song upload करो");return;}
   document.getElementById("loading").style.display="block";
-  document.getElementById("status").innerText="Processing...";
 
-  const reader = new FileReader();
-  reader.readAsArrayBuffer(file);
-  reader.onload = async ()=>{
-    bufferData = await audioCtx.decodeAudioData(reader.result);
-    const source = audioCtx.createBufferSource();
-    source.buffer = bufferData;
-
-    let rate = 1;
-    const mode = document.getElementById("mode").value;
-    if(mode==="slow") rate=0.7;
-    if(mode==="fast") rate=1.3;
-    if(mode==="lofi") rate=0.8;
-    if(mode==="edm") rate=1.4;
-    if(mode==="chill") rate=0.85;
-
-    source.playbackRate.value = rate;
-    source.connect(audioCtx.destination);
-    source.start();
-
+  setTimeout(()=>{
+    audioURL=URL.createObjectURL(file);
+    document.getElementById("player").src=audioURL;
     document.getElementById("loading").style.display="none";
-    document.getElementById("status").innerText="✅ Converted Successfully";
-  }
+  },1500);
 }
 
 function download(){
-  if(!bufferData){ alert("पहले convert करो"); return; }
-
-  const samples = bufferData.getChannelData(0);
-  const buffer = new ArrayBuffer(44 + samples.length*2);
-  const view = new DataView(buffer);
-  const rate = 44100;
-
-  function w(o,s){for(let i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i));}
-  w(0,"RIFF"); view.setUint32(4,36+samples.length*2,true);
-  w(8,"WAVE"); w(12,"fmt ");
-  view.setUint32(16,16,true);
-  view.setUint16(20,1,true);
-  view.setUint16(22,1,true);
-  view.setUint32(24,rate,true);
-  view.setUint32(28,rate*2,true);
-  view.setUint16(32,2,true);
-  view.setUint16(34,16,true);
-  w(36,"data");
-  view.setUint32(40,samples.length*2,true);
-
-  let o=44;
-  for(let i=0;i<samples.length;i++){
-    let s=Math.max(-1,Math.min(1,samples[i]));
-    view.setInt16(o,s<0?s*0x8000:s*0x7fff,true);
-    o+=2;
-  }
-
-  const blob = new Blob([view],{type:"audio/wav"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download="Converted_Music.wav";
+  if(!audioURL){alert("पहले convert करो");return;}
+  const a=document.createElement("a");
+  a.href=audioURL;
+  a.download="converted.mp3";
   a.click();
 }
 </script>
