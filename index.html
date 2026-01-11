@@ -5,7 +5,7 @@
 <title>AI Music Converter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="description" content="Free AI-based music converter for personal and educational use. Apply slow, fast, lofi, chill and EDM effects to audio you own or have permission to use. No copyrighted content is stored.">
+<meta name="description" content="Free AI-based music converter for personal and educational use. Apply slow, fast, lofi, chill and EDM effects with volume and bass control. No copyrighted content is stored.">
 <meta name="robots" content="index, follow">
 
 <style>
@@ -40,6 +40,12 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
+label{
+  display:block;
+  margin-top:12px;
+  font-size:14px;
+  opacity:0.8;
+}
 #status{
   margin-top:10px;
   font-size:14px;
@@ -48,6 +54,8 @@ button{
 small{opacity:0.7;}
 audio{width:100%; margin-top:10px;}
 </style>
+
+<script src="https://unpkg.com/lamejs@1.2.0/lame.min.js"></script>
 </head>
 
 <body>
@@ -59,122 +67,131 @@ audio{width:100%; margin-top:10px;}
   <input type="file" id="file" accept="audio/*">
 
   <select id="mode">
-    <option value="slow">🐢 Slow Song</option>
-    <option value="fast">⚡ Fast Song</option>
-    <option value="lofi">🎧 Lofi Song</option>
-    <option value="chill">🌙 Chill Mode</option>
-    <option value="edm">🔥 EDM Boost</option>
+    <option value="slow">🐢 Slow</option>
+    <option value="fast">⚡ Fast</option>
+    <option value="lofi">🎧 Lofi</option>
+    <option value="chill">🌙 Chill</option>
+    <option value="edm">🔥 EDM</option>
   </select>
 
-  <button onclick="convert()">Convert Music</button>
-  <button onclick="download()">Download Converted</button>
+  <label>🔊 Volume</label>
+  <input type="range" id="volume" min="0" max="2" step="0.1" value="1">
+
+  <label>🎚 Bass Boost</label>
+  <input type="range" id="bass" min="0" max="15" step="1" value="0">
+
+  <button onclick="convert()">Convert & Play</button>
+  <button onclick="downloadMP3()">Download MP3</button>
 
   <audio id="player" controls></audio>
   <div id="status"></div>
 
   <hr style="opacity:0.2; margin:15px 0;">
-
   <small>
-    ⚠️ <b>Important Notice:</b><br>
-    Personal & educational use only.<br>
+    ⚠️ Personal & educational use only.<br>
     Upload audio you own or have permission to use.<br>
-    No copyrighted music is stored.<br>
-    Processing happens temporarily in your browser.
+    No copyrighted content is stored.
   </small>
 </div>
 
-<!-- HIDDEN LEGAL SAFETY -->
+<!-- LEGAL SAFETY -->
 <div style="display:none;">
 <h2>Disclaimer</h2>
 <p>
-This AI Music Converter is an experimental tool.
-The website owner is not responsible for misuse or copyright violations.
+This tool is for educational and experimental purposes only.
+Website owner is not responsible for copyright misuse by users.
 </p>
 
 <h2>Privacy Policy</h2>
 <p>
 No audio files are permanently stored.
-No personal data is collected.
+All processing happens locally in the browser.
 </p>
 </div>
 
 <script>
-let audioCtx = new AudioContext();
-let sourceNode, bufferData, playbackRate = 1;
+let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let bufferData;
 
 function convert(){
-  const fileInput = document.getElementById("file");
-  if(!fileInput.files[0]){
+  const file = document.getElementById("file").files[0];
+  if(!file){
     alert("पहले कोई song upload करो");
     return;
   }
 
   const reader = new FileReader();
-  reader.readAsArrayBuffer(fileInput.files[0]);
+  reader.readAsArrayBuffer(file);
   reader.onload = async () => {
     bufferData = await audioCtx.decodeAudioData(reader.result);
 
-    if(sourceNode) sourceNode.stop();
-    sourceNode = audioCtx.createBufferSource();
-    sourceNode.buffer = bufferData;
+    const source = audioCtx.createBufferSource();
+    source.buffer = bufferData;
+
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = document.getElementById("volume").value;
+
+    const bassFilter = audioCtx.createBiquadFilter();
+    bassFilter.type = "lowshelf";
+    bassFilter.frequency.value = 200;
+    bassFilter.gain.value = document.getElementById("bass").value;
 
     const mode = document.getElementById("mode").value;
+    let rate = 1;
+    if(mode==="slow") rate = 0.7;
+    if(mode==="fast") rate = 1.3;
+    if(mode==="lofi") rate = 0.8;
+    if(mode==="chill") rate = 0.9;
+    if(mode==="edm") rate = 1.4;
 
-    if(mode==="slow") playbackRate = 0.7;
-    if(mode==="fast") playbackRate = 1.3;
-    if(mode==="lofi") playbackRate = 0.8;
-    if(mode==="chill") playbackRate = 0.9;
-    if(mode==="edm") playbackRate = 1.4;
+    source.playbackRate.value = rate;
 
-    sourceNode.playbackRate.value = playbackRate;
-    sourceNode.connect(audioCtx.destination);
-    sourceNode.start();
+    source.connect(bassFilter);
+    bassFilter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    source.start();
 
     document.getElementById("status").innerText =
-      "✅ Mode Applied: " + mode.toUpperCase();
+      "✅ Applied: " + mode.toUpperCase() +
+      " | Volume: " + gainNode.gain.value +
+      " | Bass: " + bassFilter.gain.value;
   }
 }
 
-function download(){
+function downloadMP3(){
   if(!bufferData){
     alert("पहले convert करो");
     return;
   }
-  const wav = encodeWAV(bufferData.getChannelData(0));
-  const blob = new Blob([wav], {type:"audio/wav"});
+
+  const samples = bufferData.getChannelData(0);
+  const mp3encoder = new lamejs.Mp3Encoder(1, 44100, 128);
+  let mp3Data = [];
+  let blockSize = 1152;
+
+  for(let i=0;i<samples.length;i+=blockSize){
+    const chunk = samples.subarray(i,i+blockSize);
+    const mp3buf = mp3encoder.encodeBuffer(floatTo16Bit(chunk));
+    if(mp3buf.length) mp3Data.push(mp3buf);
+  }
+
+  const end = mp3encoder.flush();
+  if(end.length) mp3Data.push(end);
+
+  const blob = new Blob(mp3Data,{type:"audio/mp3"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "Converted_Music.wav";
+  a.download = "Converted_Music.mp3";
   a.click();
 }
 
-function encodeWAV(samples){
-  const buffer = new ArrayBuffer(44 + samples.length*2);
-  const view = new DataView(buffer);
-  const rate = 44100;
-
-  function w(o,s){for(let i=0;i<s.length;i++)view.setUint8(o+i,s.charCodeAt(i));}
-  w(0,"RIFF");
-  view.setUint32(4,36+samples.length*2,true);
-  w(8,"WAVE");
-  w(12,"fmt ");
-  view.setUint32(16,16,true);
-  view.setUint16(20,1,true);
-  view.setUint16(22,1,true);
-  view.setUint32(24,rate,true);
-  view.setUint32(28,rate*2,true);
-  view.setUint16(32,2,true);
-  view.setUint16(34,16,true);
-  w(36,"data");
-  view.setUint32(40,samples.length*2,true);
-
-  let o=44;
-  for(let i=0;i<samples.length;i++){
-    let s=Math.max(-1,Math.min(1,samples[i]));
-    view.setInt16(o,s<0?s*0x8000:s*0x7fff,true);
-    o+=2;
+function floatTo16Bit(buffer){
+  let out = new Int16Array(buffer.length);
+  for(let i=0;i<buffer.length;i++){
+    out[i] = Math.max(-1,Math.min(1,buffer[i])) * 0x7fff;
   }
-  return view;
+  return out;
 }
 </script>
 
