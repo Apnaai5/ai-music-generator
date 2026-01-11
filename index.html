@@ -5,6 +5,9 @@
 <title>AI Music Converter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<meta name="description" content="Free AI-based music converter for personal and educational use. Apply slow, fast, lofi, chill and EDM effects to audio you own or have permission to use. No copyrighted content is stored.">
+<meta name="robots" content="index, follow">
+
 <style>
 body{
   margin:0;
@@ -51,7 +54,7 @@ audio{width:100%; margin-top:10px;}
 
 <div class="box">
   <h2>🎵 AI Music Converter</h2>
-  <small>Any Song → Slow / Fast / Lofi</small>
+  <small>Slow / Fast / Lofi / Chill / EDM</small>
 
   <input type="file" id="file" accept="audio/*">
 
@@ -59,6 +62,8 @@ audio{width:100%; margin-top:10px;}
     <option value="slow">🐢 Slow Song</option>
     <option value="fast">⚡ Fast Song</option>
     <option value="lofi">🎧 Lofi Song</option>
+    <option value="chill">🌙 Chill Mode</option>
+    <option value="edm">🔥 EDM Boost</option>
   </select>
 
   <button onclick="convert()">Convert Music</button>
@@ -66,6 +71,31 @@ audio{width:100%; margin-top:10px;}
 
   <audio id="player" controls></audio>
   <div id="status"></div>
+
+  <hr style="opacity:0.2; margin:15px 0;">
+
+  <small>
+    ⚠️ <b>Important Notice:</b><br>
+    Personal & educational use only.<br>
+    Upload audio you own or have permission to use.<br>
+    No copyrighted music is stored.<br>
+    Processing happens temporarily in your browser.
+  </small>
+</div>
+
+<!-- HIDDEN LEGAL SAFETY -->
+<div style="display:none;">
+<h2>Disclaimer</h2>
+<p>
+This AI Music Converter is an experimental tool.
+The website owner is not responsible for misuse or copyright violations.
+</p>
+
+<h2>Privacy Policy</h2>
+<p>
+No audio files are permanently stored.
+No personal data is collected.
+</p>
 </div>
 
 <script>
@@ -89,16 +119,19 @@ function convert(){
     sourceNode.buffer = bufferData;
 
     const mode = document.getElementById("mode").value;
+
     if(mode==="slow") playbackRate = 0.7;
     if(mode==="fast") playbackRate = 1.3;
     if(mode==="lofi") playbackRate = 0.8;
+    if(mode==="chill") playbackRate = 0.9;
+    if(mode==="edm") playbackRate = 1.4;
 
     sourceNode.playbackRate.value = playbackRate;
     sourceNode.connect(audioCtx.destination);
     sourceNode.start();
 
     document.getElementById("status").innerText =
-      "✅ Converted: " + mode.toUpperCase();
+      "✅ Mode Applied: " + mode.toUpperCase();
   }
 }
 
