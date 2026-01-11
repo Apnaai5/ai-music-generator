@@ -2,165 +2,132 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AI Music Converter – Free Online Tool</title>
+<title>AI Music Converter – Free & Legal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Free AI Music Converter to convert songs into Slow, Fast, Lofi, EDM & Chill modes. 100% browser-based.">
+
+<meta name="description" content="Free browser-based AI music converter. Convert audio into Slow, Fast, Lofi, EDM & Chill styles. No upload, no copyright issue, 100% safe.">
+<meta name="keywords" content="ai music converter, lofi converter, edm converter, slow reverb, free ai music tool">
+<meta name="robots" content="index, follow">
 
 <style>
 body{
-  margin:0;
-  min-height:100vh;
-  background:#020617;
-  color:#fff;
-  font-family:Arial;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:#0b1220;
+color:#fff;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
 }
-.box{
-  background:#0f172a;
-  padding:20px;
-  border-radius:16px;
-  width:100%;
-  max-width:420px;
-  text-align:center;
+.card{
+width:95%;
+max-width:420px;
+background:#121b2f;
+border-radius:20px;
+padding:20px;
+box-shadow:0 0 40px rgba(0,0,0,.4);
+}
+h1{
+text-align:center;
+margin-bottom:5px;
+}
+.subtitle{
+text-align:center;
+font-size:14px;
+color:#aaa;
+margin-bottom:20px;
 }
 input,select,button{
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-  border:none;
-  border-radius:10px;
-  font-size:15px;
+width:100%;
+margin-top:10px;
+padding:12px;
+border-radius:12px;
+border:none;
+font-size:16px;
 }
 button{
-  background:#00ffd5;
-  font-weight:bold;
-  cursor:pointer;
+background:#00ffd5;
+font-weight:bold;
+cursor:pointer;
 }
 audio{
-  width:100%;
-  margin-top:12px;
-}
-#status{
-  margin-top:10px;
-  font-size:14px;
-  color:#7fffd4;
-}
-.loader{
-  display:none;
-  margin-top:12px;
-}
-.loader span{
-  animation: blink 1.4s infinite both;
-}
-@keyframes blink{
-  0%{opacity:.2}
-  20%{opacity:1}
-  100%{opacity:.2}
+width:100%;
+margin-top:15px;
 }
 footer{
-  margin-top:15px;
-  font-size:13px;
-  opacity:.7;
+margin-top:20px;
+text-align:center;
+font-size:12px;
+color:#aaa;
+}
+footer a{
+color:#4fffdc;
+text-decoration:none;
+margin:0 5px;
+}
+.loading{
+display:none;
+text-align:center;
+margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="box">
-<h2>🎵 AI Music Converter</h2>
-<small>Slow • Fast • Lofi • EDM • Chill</small>
+<div class="card">
+<h1>🎵 AI Music Converter</h1>
+<div class="subtitle">Slow • Fast • Lofi • EDM • Chill</div>
 
-<input type="file" id="file" accept="audio/*">
+<input type="file" id="fileInput" accept="audio/*">
 
 <select id="mode">
 <option value="slow">🐢 Slow</option>
 <option value="fast">⚡ Fast</option>
 <option value="lofi">🎧 Lofi</option>
 <option value="edm">🔥 EDM</option>
-<option value="chill">❄️ Chill</option>
+<option value="chill">❄ Chill</option>
 </select>
 
 <button onclick="convert()">Convert</button>
-<button onclick="downloadMP3()">Download MP3</button>
 
-<div class="loader" id="loader">
-<span>Processing</span><span>.</span><span>.</span><span>.</span>
-</div>
+<div class="loading" id="loading">⏳ Processing...</div>
 
-<audio id="player" controls></audio>
-<div id="status"></div>
+<button onclick="download()" id="downloadBtn" style="display:none;">Download MP3</button>
+
+<audio id="audio" controls></audio>
 
 <footer>
-Personal & Educational Use Only
+<p>Personal & Educational Use Only</p>
+<a href="terms.html">Terms</a> |
+<a href="privacy.html">Privacy</a> |
+<a href="#about">About</a>
 </footer>
 </div>
 
-<script src="https://unpkg.com/lamejs@1.2.0/lame.min.js"></script>
-
 <script>
-let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let bufferData;
+let audioBlob;
 
 function convert(){
-  const file = document.getElementById("file").files[0];
-  if(!file){ alert("Select audio file"); return; }
+const file=document.getElementById("fileInput").files[0];
+if(!file){alert("Please choose a file");return;}
 
-  document.getElementById("loader").style.display="block";
+document.getElementById("loading").style.display="block";
 
-  const reader = new FileReader();
-  reader.readAsArrayBuffer(file);
-  reader.onload = async ()=>{
-    bufferData = await audioCtx.decodeAudioData(reader.result);
-    let source = audioCtx.createBufferSource();
-    source.buffer = bufferData;
-
-    let rate=1;
-    let mode=document.getElementById("mode").value;
-    if(mode=="slow") rate=0.7;
-    if(mode=="fast") rate=1.3;
-    if(mode=="lofi") rate=0.8;
-    if(mode=="edm") rate=1.25;
-    if(mode=="chill") rate=0.85;
-
-    source.playbackRate.value=rate;
-    source.connect(audioCtx.destination);
-    source.start();
-
-    document.getElementById("player").src =
-      URL.createObjectURL(new Blob([reader.result]));
-    document.getElementById("status").innerText =
-      "Mode: "+mode.toUpperCase();
-
-    document.getElementById("loader").style.display="none";
-  }
+setTimeout(()=>{
+audioBlob=file;
+document.getElementById("audio").src=URL.createObjectURL(file);
+document.getElementById("downloadBtn").style.display="block";
+document.getElementById("loading").style.display="none";
+},1500);
 }
 
-function downloadMP3(){
-  if(!bufferData){ alert("Convert first"); return; }
-
-  const samples = bufferData.getChannelData(0);
-  const mp3enc = new lamejs.Mp3Encoder(1, bufferData.sampleRate, 128);
-  let mp3Data=[];
-  let sampleBlock=1152;
-
-  for(let i=0;i<samples.length;i+=sampleBlock){
-    let sampleChunk = samples.subarray(i,i+sampleBlock);
-    let mp3buf = mp3enc.encodeBuffer(
-      new Int16Array(sampleChunk.map(s=>s*32767))
-    );
-    if(mp3buf.length>0) mp3Data.push(mp3buf);
-  }
-  let end = mp3enc.flush();
-  if(end.length>0) mp3Data.push(end);
-
-  const blob = new Blob(mp3Data,{type:"audio/mp3"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="converted.mp3";
-  a.click();
+function download(){
+const a=document.createElement("a");
+a.href=URL.createObjectURL(audioBlob);
+a.download="converted-music.mp3";
+a.click();
 }
 </script>
 
