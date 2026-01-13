@@ -77,10 +77,10 @@ hr{opacity:.2}
 <button onclick="download()">Download</button>
 <button id="installBtn" style="display:none">📲 Install App</button>
 <button onclick="shareApp()">🔗 Share</button>
-  
+
 <div id="loader">
-<div class="spin"></div>
-<p>Processing audio…</p>
+ <div class="spin"></div>
+ <p>Please wait… Audio processing</p>
 </div>
 
 <audio id="player" controls></audio>
@@ -90,15 +90,15 @@ hr{opacity:.2}
 <div class="section">
 <h3>About</h3>
 <p>
-This tool converts user-uploaded audio into different styles using browser-based processing.
-No files are uploaded to any server.
+This tool converts user-uploaded audio into Slow, Fast, Lofi, EDM and Chill styles.
+All processing happens inside your browser.
 </p>
 </div>
 
 <div class="section">
 <h3>Privacy Policy</h3>
 <p>
-We do not store, collect or track any audio.
+We do not upload, store or track any audio files.
 Everything runs locally on your device.
 </p>
 </div>
@@ -106,15 +106,16 @@ Everything runs locally on your device.
 <div class="section">
 <h3>Terms & Disclaimer</h3>
 <p>
-Upload only content you own or have rights to.
-We do not host copyrighted material.
+Upload only content you own or have permission to use.
+This tool does not host or distribute copyrighted files.
+GitHub Pages compliant.
 </p>
 </div>
 
 <div class="section">
 <h3>Contact</h3>
 <p>
-Support is provided via GitHub repository issues.
+For support, please use GitHub repository issues.
 </p>
 </div>
 
@@ -126,102 +127,123 @@ Support is provided via GitHub repository issues.
 let outputBlob;
 
 async function convert(){
- const f=document.getElementById("file").files[0];
- if(!f){alert("पहले audio upload करो");return;}
+ try{
+  const file = document.getElementById("file").files[0];
+  if(!file){ alert("पहले audio upload करो"); return; }
 
- loader(true);
+  loader(true);
 
- const ctx=new AudioContext({sampleRate:32000}); // MP3-like compression
- const buf=await ctx.decodeAudioData(await f.arrayBuffer());
+  const audioCtx = new AudioContext();
+  const buffer = await audioCtx.decodeAudioData(await file.arrayBuffer());
 
- const off=new OfflineAudioContext(
-  buf.numberOfChannels,
-  buf.length,
-  32000
- );
+  const offlineCtx = new OfflineAudioContext(
+    buffer.numberOfChannels,
+    buffer.length,
+    buffer.sampleRate
+  );
 
- const src=off.createBufferSource();
- src.buffer=buf;
+  const source = offlineCtx.createBufferSource();
+  source.buffer = buffer;
 
- const mode=document.getElementById("mode").value;
+  const mode = document.getElementById("mode").value;
 
- if(mode==="slow") src.playbackRate.value=0.75;
- if(mode==="fast") src.playbackRate.value=1.3;
+  if(mode==="slow") source.playbackRate.value = 0.7;
+  if(mode==="fast") source.playbackRate.value = 1.4;
 
- let last=src;
+  let node = source;
 
- if(mode==="lofi" || mode==="chill"){
-  const low=off.createBiquadFilter();
-  low.type="lowpass";
-  low.frequency.value=mode==="chill"?550:900;
-  last.connect(low);
-  last=low;
+  if(mode==="lofi" || mode==="chill"){
+    const lowpass = offlineCtx.createBiquadFilter();
+    lowpass.type = "lowpass";
+    lowpass.frequency.value = mode==="chill" ? 600 : 1000;
+    node.connect(lowpass);
+    node = lowpass;
+  }
+
+  if(mode==="edm"){
+    const bass = offlineCtx.createBiquadFilter();
+    bass.type = "lowshelf";
+    bass.frequency.value = 120;
+    bass.gain.value = 10;
+    node.connect(bass);
+    node = bass;
+  }
+
+  node.connect(offlineCtx.destination);
+  source.start(0);
+
+  const rendered = await offlineCtx.startRendering();
+  outputBlob = bufferToWav(rendered);
+
+  document.getElementById("player").src =
+    URL.createObjectURL(outputBlob);
+
+  loader(false);
+
+ }catch(e){
+  loader(false);
+  alert("Audio convert failed. Try another file.");
  }
-
- if(mode==="edm"){
-  const boost=off.createBiquadFilter();
-  boost.type="lowshelf";
-  boost.frequency.value=120;
-  boost.gain.value=8;
-  last.connect(boost);
-  last=boost;
- }
-
- last.connect(off.destination);
- src.start();
-
- const rendered=await off.startRendering();
- outputBlob=toWav(rendered,rendered.length);
-
- document.getElementById("player").src=URL.createObjectURL(outputBlob);
- loader(false);
 }
 
-function loader(v){
- document.getElementById("loader").style.display=v?"block":"none";
+function loader(show){
+ document.getElementById("loader").style.display =
+  show ? "block" : "none";
 }
 
 function download(){
- if(!outputBlob){alert("पहले convert करो");return;}
- const a=document.createElement("a");
- a.href=URL.createObjectURL(outputBlob);
- a.download="AI_Music_Converted.wav";
+ if(!outputBlob){
+  alert("पहले convert करो");
+  return;
+ }
+ const a = document.createElement("a");
+ a.href = URL.createObjectURL(outputBlob);
+ a.download = "AI_Music_Converted.wav";
  a.click();
 }
 
-function toWav(buf,len){
- const ch=buf.numberOfChannels;
- const b=new ArrayBuffer(44+len*ch*2);
- const v=new DataView(b);
- let p=0;
+function bufferToWav(buffer){
+ const ch = buffer.numberOfChannels;
+ const length = buffer.length * ch * 2;
+ const arrayBuffer = new ArrayBuffer(44 + length);
+ const view = new DataView(arrayBuffer);
+ let offset = 0;
 
- const w=s=>{for(let i=0;i<s.length;i++)v.setUint8(p++,s.charCodeAt(i));};
+ const write = s => {
+  for(let i=0;i<s.length;i++)
+   view.setUint8(offset++, s.charCodeAt(i));
+ };
 
- w("RIFF");v.setUint32(p,36+len*2,true);p+=4;
- w("WAVEfmt ");v.setUint32(p,16,true);p+=4;
- v.setUint16(p,1,true);p+=2;
- v.setUint16(p,ch,true);p+=2;
- v.setUint32(p,32000,true);p+=4;
- v.setUint32(p,32000*2*ch,true);p+=4;
- v.setUint16(p,ch*2,true);p+=2;
- v.setUint16(p,16,true);p+=2;
- w("data");v.setUint32(p,len*2,true);p+=4;
+ write("RIFF");
+ view.setUint32(offset,36+length,true); offset+=4;
+ write("WAVEfmt ");
+ view.setUint32(offset,16,true); offset+=4;
+ view.setUint16(offset,1,true); offset+=2;
+ view.setUint16(offset,ch,true); offset+=2;
+ view.setUint32(offset,buffer.sampleRate,true); offset+=4;
+ view.setUint32(offset,buffer.sampleRate*ch*2,true); offset+=4;
+ view.setUint16(offset,ch*2,true); offset+=2;
+ view.setUint16(offset,16,true); offset+=2;
+ write("data");
+ view.setUint32(offset,length,true); offset+=4;
 
- const d=[];
- for(let i=0;i<ch;i++) d.push(buf.getChannelData(i));
-
- for(let i=0;i<len;i++){
+ for(let i=0;i<buffer.length;i++){
   for(let j=0;j<ch;j++){
-   let s=Math.max(-1,Math.min(1,d[j][i]));
-   v.setInt16(p,s*32767,true);p+=2;
+   let sample = buffer.getChannelData(j)[i];
+   sample = Math.max(-1, Math.min(1, sample));
+   view.setInt16(offset, sample*32767, true);
+   offset+=2;
   }
  }
- return new Blob([v],{type:"audio/wav"});
-}let deferredPrompt;
 
-window.addEventListener("beforeinstallprompt", e => {
+ return new Blob([view],{type:"audio/wav"});
+}
+
+/* PWA install */
+let deferredPrompt;
+window.addEventListener("beforeinstallprompt", e=>{
  e.preventDefault();
- deferredPrompt = e;
+ deferredPrompt=e;
  document.getElementById("installBtn").style.display="block";
 });
 
@@ -231,14 +253,18 @@ document.getElementById("installBtn").onclick = async ()=>{
  deferredPrompt=null;
 };
 
+/* Share */
 function shareApp(){
- navigator.share({
-  title:"AI Music Converter",
-  text:"Free AI Music Converter – Slow, Fast, Lofi, EDM, Chill",
-  url:location.href
- });
-                              }
-  
+ if(navigator.share){
+  navigator.share({
+   title:"AI Music Converter",
+   text:"Free AI Music Converter – Slow, Fast, Lofi, EDM, Chill",
+   url:location.href
+  });
+ }else{
+  alert("Sharing not supported");
+ }
+}
 </script>
 
 </body>
