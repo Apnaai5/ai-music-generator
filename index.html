@@ -3,7 +3,7 @@
 
 <head>
 
-<title>AI Music Studio MEGA PRO</title>
+<title>AI Music Studio Ultimate AI</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -73,18 +73,22 @@ margin-top:20px;
 <body>
 
 <header>
-AI MUSIC STUDIO MEGA PRO
+AI MUSIC STUDIO ULTIMATE AI
 </header>
 
 <div class="container">
 
 <h3>1. Upload Music</h3>
-
 <input type="file" id="upload">
+
+<h3>OR Paste YouTube Link</h3>
+<input type="text" id="ytlink" placeholder="Paste YouTube link">
 
 <div id="waveform"></div>
 
-<h3>2. AI Effects</h3>
+<h3>2. Convert / AI Effects</h3>
+
+<button onclick="convert()">Convert Audio</button>
 
 <button onclick="bhajan()">Bhajan Mode</button>
 
@@ -94,7 +98,7 @@ AI MUSIC STUDIO MEGA PRO
 
 <button onclick="female()">AI Female Voice</button>
 
-<button onclick="karaoke()">AI Karaoke Mode</button>
+<button onclick="karaoke()">AI Karaoke</button>
 
 <button onclick="beat()">Beat Boost</button>
 
@@ -110,31 +114,27 @@ AI MUSIC STUDIO MEGA PRO
 
 <input class="slider" type="range" min="0.5" max="3" step="0.01" value="1" id="speed">
 
-<h3>4. Volume</h3>
+<h3>4. Volume Control</h3>
 
 <input class="slider" type="range" min="0" max="1" step="0.01" value="1" id="volume">
 
 <h3>5. DJ Mixer</h3>
 
 <label>Bass</label>
-
 <input class="slider" type="range" min="0" max="2">
 
 <label>Treble</label>
-
 <input class="slider" type="range" min="0" max="2">
 
 <h3>6. Trim Music</h3>
 
 <label>Start</label>
-
 <input class="slider" type="range" min="0" max="100">
 
 <label>End</label>
-
 <input class="slider" type="range" min="0" max="100">
 
-<h3>7. Play Music</h3>
+<h3>7. Preview Music</h3>
 
 <button onclick="play()">Play</button>
 
@@ -171,6 +171,10 @@ wavesurfer.load(musicURL);
 
 });
 
+function convert(){
+alert("Audio Ready For Effects");
+}
+
 function play(){
 wavesurfer.play();
 }
@@ -197,11 +201,11 @@ wavesurfer.setPlaybackRate(1.25);
 }
 
 function male(){
-wavesurfer.setPlaybackRate(0.95);
+wavesurfer.setPlaybackRate(0.9);
 }
 
 function female(){
-wavesurfer.setPlaybackRate(1.15);
+wavesurfer.setPlaybackRate(1.2);
 }
 
 function karaoke(){
