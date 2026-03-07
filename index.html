@@ -1,286 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>AI Music Converter</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>AI Music Studio Pro</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://unpkg.com/wavesurfer.js"></script>
 
 <style>
+
 body{
- background:#0b1220;
- color:#fff;
- font-family:system-ui;
- margin:0;
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#141e30,#243b55);
+color:white;
+text-align:center;
 }
+
+header{
+background:black;
+padding:15px;
+font-size:20px;
+}
+
 .container{
- max-width:430px;
- margin:auto;
- padding:20px;
+max-width:520px;
+margin:auto;
+margin-top:40px;
+background:#111;
+padding:25px;
+border-radius:12px;
+box-shadow:0 0 30px rgba(0,0,0,0.7);
 }
-h1{margin-bottom:5px}
-p{opacity:.8}
 
-input,select,button{
- width:100%;
- padding:14px;
- margin-top:12px;
- border-radius:12px;
- border:none;
- font-size:16px;
-}
 button{
- background:#00ffd5;
- color:#000;
- font-weight:700;
+padding:10px 15px;
+margin:5px;
+border:none;
+border-radius:6px;
+font-size:15px;
+cursor:pointer;
+background:#00ffd5;
+color:black;
 }
 
-audio{width:100%;margin-top:15px}
-
-#loader{
- display:none;
- margin-top:20px;
- text-align:center;
+button:hover{
+background:#00c9a7;
 }
-.spin{
- width:42px;height:42px;
- border:4px solid #333;
- border-top:4px solid #00ffd5;
- border-radius:50%;
- animation:spin 1s linear infinite;
- margin:auto;
-}
-@keyframes spin{100%{transform:rotate(360deg)}}
 
-.section{margin-top:40px;font-size:14px;opacity:.9}
-footer{text-align:center;margin:40px 0;font-size:13px;opacity:.7}
-hr{opacity:.2}
+.slider{
+width:100%;
+margin-top:10px;
+}
+
+#waveform{
+margin-top:20px;
+}
+
 </style>
+
 </head>
-<hr>
 
-<h2>🎵 AI Music & Lyrics (NEW)</h2>
-
-<p>
-Lyrics, Music Generate aur Convert ke liye
-neeche AI panel open hoga.
-</p>
-
-<a href="https://huggingface.co/spaces/YOUR-USERNAME/YOUR-SPACE"
-target="_blank">
-<button style="padding:10px;font-size:16px;">
-Open AI Music Tool
-</button>
-</a>
- 
 <body>
+
+<header>
+AI MUSIC STUDIO PRO
+</header>
+
 <div class="container">
 
-<h1>🎵 AI Music Converter</h1>
-<p>Slow • Fast • Lofi • EDM • Chill</p>
+<h3>Upload Music</h3>
 
-<input type="file" id="file" accept="audio/*">
+<input type="file" id="upload">
 
-<select id="mode">
-<option value="slow">🐢 Slow</option>
-<option value="fast">⚡ Fast</option>
-<option value="lofi">🎧 Lofi</option>
-<option value="edm">🔥 EDM</option>
-<option value="chill">🌙 Chill</option>
-</select>
+<div id="waveform"></div>
 
-<button onclick="convert()">Convert</button>
-<button onclick="download()">Download</button>
-<button id="installBtn" style="display:none">📲 Install App</button>
-<button onclick="shareApp()">🔗 Share</button>
+<br>
 
-<div id="loader">
- <div class="spin"></div>
- <p>Please wait… Audio processing</p>
-</div>
+<button onclick="play()">Play</button>
+<button onclick="pause()">Pause</button>
 
-<audio id="player" controls></audio>
+<br>
 
-<hr>
+<button onclick="slow()">Slow</button>
+<button onclick="fast()">Fast</button>
 
-<div class="section">
-<h3>About</h3>
-<p>
-This tool converts user-uploaded audio into Slow, Fast, Lofi, EDM and Chill styles.
-All processing happens inside your browser.
-</p>
-</div>
+<button onclick="bhajan()">Bhajan Mode</button>
+<button onclick="remix()">Auto Remix</button>
 
-<div class="section">
-<h3>Privacy Policy</h3>
-<p>
-We do not upload, store or track any audio files.
-Everything runs locally on your device.
-</p>
-</div>
+<br>
 
-<div class="section">
-<h3>Terms & Disclaimer</h3>
-<p>
-Upload only content you own or have permission to use.
-This tool does not host or distribute copyrighted files.
-GitHub Pages compliant.
-</p>
-</div>
+<button onclick="male()">Male Voice</button>
+<button onclick="female()">Female Voice</button>
 
-<div class="section">
-<h3>Contact</h3>
-<p>
-For support, please use GitHub repository issues.
-</p>
-</div>
+<br>
 
-<footer>© 2026 AI Music Converter</footer>
+<label>Start Trim</label>
+<input class="slider" type="range" min="0" max="100" value="0" id="start">
+
+<label>End Trim</label>
+<input class="slider" type="range" min="0" max="100" value="100" id="end">
+
+<br>
+
+<button onclick="exportAudio()">Export Music</button>
+
+<br><br>
+
+<label>Custom Speed</label>
+<input class="slider" type="range" min="0.5" max="3" step="0.01" value="1" id="speed">
+
+<label>Volume</label>
+<input class="slider" type="range" min="0" max="1" step="0.01" value="1" id="volume">
 
 </div>
 
 <script>
-let outputBlob;
 
-async function convert(){
- try{
-  const file = document.getElementById("file").files[0];
-  if(!file){ alert("पहले audio upload करो"); return; }
-
-  loader(true);
-
-  const audioCtx = new AudioContext();
-  const buffer = await audioCtx.decodeAudioData(await file.arrayBuffer());
-
-  const offlineCtx = new OfflineAudioContext(
-    buffer.numberOfChannels,
-    buffer.length,
-    buffer.sampleRate
-  );
-
-  const source = offlineCtx.createBufferSource();
-  source.buffer = buffer;
-
-  const mode = document.getElementById("mode").value;
-
-  if(mode==="slow") source.playbackRate.value = 0.7;
-  if(mode==="fast") source.playbackRate.value = 1.4;
-
-  let node = source;
-
-  if(mode==="lofi" || mode==="chill"){
-    const lowpass = offlineCtx.createBiquadFilter();
-    lowpass.type = "lowpass";
-    lowpass.frequency.value = mode==="chill" ? 600 : 1000;
-    node.connect(lowpass);
-    node = lowpass;
-  }
-
-  if(mode==="edm"){
-    const bass = offlineCtx.createBiquadFilter();
-    bass.type = "lowshelf";
-    bass.frequency.value = 120;
-    bass.gain.value = 10;
-    node.connect(bass);
-    node = bass;
-  }
-
-  node.connect(offlineCtx.destination);
-  source.start(0);
-
-  const rendered = await offlineCtx.startRendering();
-  outputBlob = bufferToWav(rendered);
-
-  document.getElementById("player").src =
-    URL.createObjectURL(outputBlob);
-
-  loader(false);
-
- }catch(e){
-  loader(false);
-  alert("Audio convert failed. Try another file.");
- }
-}
-
-function loader(show){
- document.getElementById("loader").style.display =
-  show ? "block" : "none";
-}
-
-function download(){
- if(!outputBlob){
-  alert("पहले convert करो");
-  return;
- }
- const a = document.createElement("a");
- a.href = URL.createObjectURL(outputBlob);
- a.download = "AI_Music_Converted.wav";
- a.click();
-}
-
-function bufferToWav(buffer){
- const ch = buffer.numberOfChannels;
- const length = buffer.length * ch * 2;
- const arrayBuffer = new ArrayBuffer(44 + length);
- const view = new DataView(arrayBuffer);
- let offset = 0;
-
- const write = s => {
-  for(let i=0;i<s.length;i++)
-   view.setUint8(offset++, s.charCodeAt(i));
- };
-
- write("RIFF");
- view.setUint32(offset,36+length,true); offset+=4;
- write("WAVEfmt ");
- view.setUint32(offset,16,true); offset+=4;
- view.setUint16(offset,1,true); offset+=2;
- view.setUint16(offset,ch,true); offset+=2;
- view.setUint32(offset,buffer.sampleRate,true); offset+=4;
- view.setUint32(offset,buffer.sampleRate*ch*2,true); offset+=4;
- view.setUint16(offset,ch*2,true); offset+=2;
- view.setUint16(offset,16,true); offset+=2;
- write("data");
- view.setUint32(offset,length,true); offset+=4;
-
- for(let i=0;i<buffer.length;i++){
-  for(let j=0;j<ch;j++){
-   let sample = buffer.getChannelData(j)[i];
-   sample = Math.max(-1, Math.min(1, sample));
-   view.setInt16(offset, sample*32767, true);
-   offset+=2;
-  }
- }
-
- return new Blob([view],{type:"audio/wav"});
-}
-
-/* PWA install */
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt", e=>{
- e.preventDefault();
- deferredPrompt=e;
- document.getElementById("installBtn").style.display="block";
+let wavesurfer=WaveSurfer.create({
+container:"#waveform",
+waveColor:"#888",
+progressColor:"#00ffd5",
+height:80
 });
 
-document.getElementById("installBtn").onclick = async ()=>{
- deferredPrompt.prompt();
- await deferredPrompt.userChoice;
- deferredPrompt=null;
-};
+const upload=document.getElementById("upload");
+const volume=document.getElementById("volume");
+const speed=document.getElementById("speed");
 
-/* Share */
-function shareApp(){
- if(navigator.share){
-  navigator.share({
-   title:"AI Music Converter",
-   text:"Free AI Music Converter – Slow, Fast, Lofi, EDM, Chill",
-   url:location.href
-  });
- }else{
-  alert("Sharing not supported");
- }
+let musicURL="";
+
+upload.addEventListener("change",function(){
+
+const file=this.files[0];
+
+musicURL=URL.createObjectURL(file);
+
+wavesurfer.load(musicURL);
+
+});
+
+function play(){
+wavesurfer.play();
 }
+
+function pause(){
+wavesurfer.pause();
+}
+
+function slow(){
+wavesurfer.setPlaybackRate(0.75);
+}
+
+function fast(){
+wavesurfer.setPlaybackRate(1.5);
+}
+
+function bhajan(){
+wavesurfer.setPlaybackRate(0.85);
+wavesurfer.setVolume(0.8);
+}
+
+function remix(){
+wavesurfer.setPlaybackRate(1.25);
+}
+
+function male(){
+wavesurfer.setPlaybackRate(0.95);
+}
+
+function female(){
+wavesurfer.setPlaybackRate(1.15);
+}
+
+speed.oninput=function(){
+wavesurfer.setPlaybackRate(this.value);
+}
+
+volume.oninput=function(){
+wavesurfer.setVolume(this.value);
+}
+
+function exportAudio(){
+
+if(musicURL){
+
+const a=document.createElement("a");
+
+a.href=musicURL;
+
+a.download="music_export.mp3";
+
+a.click();
+
+}
+
+}
+
 </script>
 
 </body>
+
 </html>
