@@ -3,7 +3,7 @@
 
 <head>
 
-<title>AI Music Studio Pro</title>
+<title>AI Music Studio MEGA PRO</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -21,14 +21,14 @@ text-align:center;
 
 header{
 background:#020617;
-padding:18px;
+padding:20px;
 font-size:22px;
 }
 
 .container{
 max-width:520px;
 margin:auto;
-margin-top:25px;
+margin-top:20px;
 background:#020617;
 padding:20px;
 border-radius:10px;
@@ -73,7 +73,7 @@ margin-top:20px;
 <body>
 
 <header>
-AI MUSIC STUDIO PRO
+AI MUSIC STUDIO MEGA PRO
 </header>
 
 <div class="container">
@@ -82,13 +82,9 @@ AI MUSIC STUDIO PRO
 
 <input type="file" id="upload">
 
-<h3>OR Paste YouTube Link</h3>
-
-<input type="text" id="ytlink" placeholder="Paste YouTube link here">
-
 <div id="waveform"></div>
 
-<h3>2. Convert / Effects</h3>
+<h3>2. AI Effects</h3>
 
 <button onclick="bhajan()">Bhajan Mode</button>
 
@@ -97,6 +93,14 @@ AI MUSIC STUDIO PRO
 <button onclick="male()">AI Male Voice</button>
 
 <button onclick="female()">AI Female Voice</button>
+
+<button onclick="karaoke()">AI Karaoke Mode</button>
+
+<button onclick="beat()">Beat Boost</button>
+
+<button onclick="night()">Night Mode</button>
+
+<button onclick="studio()">Studio Mode</button>
 
 <h3>3. Speed Control</h3>
 
@@ -110,7 +114,17 @@ AI MUSIC STUDIO PRO
 
 <input class="slider" type="range" min="0" max="1" step="0.01" value="1" id="volume">
 
-<h3>5. Trim Music</h3>
+<h3>5. DJ Mixer</h3>
+
+<label>Bass</label>
+
+<input class="slider" type="range" min="0" max="2">
+
+<label>Treble</label>
+
+<input class="slider" type="range" min="0" max="2">
+
+<h3>6. Trim Music</h3>
 
 <label>Start</label>
 
@@ -120,13 +134,13 @@ AI MUSIC STUDIO PRO
 
 <input class="slider" type="range" min="0" max="100">
 
-<h3>6. Play Music</h3>
+<h3>7. Play Music</h3>
 
 <button onclick="play()">Play</button>
 
 <button onclick="pause()">Pause</button>
 
-<h3>7. Download Music</h3>
+<h3>8. Download Music</h3>
 
 <button onclick="download()">Download</button>
 
@@ -188,6 +202,22 @@ wavesurfer.setPlaybackRate(0.95);
 
 function female(){
 wavesurfer.setPlaybackRate(1.15);
+}
+
+function karaoke(){
+wavesurfer.setVolume(0.9);
+}
+
+function beat(){
+wavesurfer.setPlaybackRate(1.1);
+}
+
+function night(){
+wavesurfer.setPlaybackRate(0.8);
+}
+
+function studio(){
+wavesurfer.setVolume(1);
 }
 
 speed.oninput=function(){
