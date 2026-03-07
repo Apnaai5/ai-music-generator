@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <title>AI Music Studio Pro</title>
@@ -13,45 +14,52 @@
 body{
 margin:0;
 font-family:Arial;
-background:linear-gradient(135deg,#141e30,#243b55);
+background:#0f172a;
 color:white;
 text-align:center;
 }
 
 header{
-background:black;
-padding:15px;
-font-size:20px;
+background:#020617;
+padding:18px;
+font-size:22px;
 }
 
 .container{
 max-width:520px;
 margin:auto;
-margin-top:40px;
-background:#111;
-padding:25px;
-border-radius:12px;
-box-shadow:0 0 30px rgba(0,0,0,0.7);
+margin-top:25px;
+background:#020617;
+padding:20px;
+border-radius:10px;
 }
 
 button{
-padding:10px 15px;
-margin:5px;
+width:100%;
+padding:12px;
+margin-top:8px;
 border:none;
 border-radius:6px;
 font-size:15px;
 cursor:pointer;
-background:#00ffd5;
+background:#14b8a6;
 color:black;
 }
 
 button:hover{
-background:#00c9a7;
+background:#0d9488;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:8px;
+border-radius:6px;
+border:none;
 }
 
 .slider{
 width:100%;
-margin-top:10px;
 }
 
 #waveform{
@@ -70,49 +78,57 @@ AI MUSIC STUDIO PRO
 
 <div class="container">
 
-<h3>Upload Music</h3>
+<h3>1. Upload Music</h3>
 
 <input type="file" id="upload">
 
+<h3>OR Paste YouTube Link</h3>
+
+<input type="text" id="ytlink" placeholder="Paste YouTube link here">
+
 <div id="waveform"></div>
 
-<br>
-
-<button onclick="play()">Play</button>
-<button onclick="pause()">Pause</button>
-
-<br>
-
-<button onclick="slow()">Slow</button>
-<button onclick="fast()">Fast</button>
+<h3>2. Convert / Effects</h3>
 
 <button onclick="bhajan()">Bhajan Mode</button>
+
 <button onclick="remix()">Auto Remix</button>
 
-<br>
+<button onclick="male()">AI Male Voice</button>
 
-<button onclick="male()">Male Voice</button>
-<button onclick="female()">Female Voice</button>
+<button onclick="female()">AI Female Voice</button>
 
-<br>
+<h3>3. Speed Control</h3>
 
-<label>Start Trim</label>
-<input class="slider" type="range" min="0" max="100" value="0" id="start">
+<button onclick="slow()">Slow</button>
 
-<label>End Trim</label>
-<input class="slider" type="range" min="0" max="100" value="100" id="end">
+<button onclick="fast()">Fast</button>
 
-<br>
-
-<button onclick="exportAudio()">Export Music</button>
-
-<br><br>
-
-<label>Custom Speed</label>
 <input class="slider" type="range" min="0.5" max="3" step="0.01" value="1" id="speed">
 
-<label>Volume</label>
+<h3>4. Volume</h3>
+
 <input class="slider" type="range" min="0" max="1" step="0.01" value="1" id="volume">
+
+<h3>5. Trim Music</h3>
+
+<label>Start</label>
+
+<input class="slider" type="range" min="0" max="100">
+
+<label>End</label>
+
+<input class="slider" type="range" min="0" max="100">
+
+<h3>6. Play Music</h3>
+
+<button onclick="play()">Play</button>
+
+<button onclick="pause()">Pause</button>
+
+<h3>7. Download Music</h3>
+
+<button onclick="download()">Download</button>
 
 </div>
 
@@ -120,8 +136,8 @@ AI MUSIC STUDIO PRO
 
 let wavesurfer=WaveSurfer.create({
 container:"#waveform",
-waveColor:"#888",
-progressColor:"#00ffd5",
+waveColor:"#64748b",
+progressColor:"#14b8a6",
 height:80
 });
 
@@ -182,7 +198,7 @@ volume.oninput=function(){
 wavesurfer.setVolume(this.value);
 }
 
-function exportAudio(){
+function download(){
 
 if(musicURL){
 
@@ -190,7 +206,7 @@ const a=document.createElement("a");
 
 a.href=musicURL;
 
-a.download="music_export.mp3";
+a.download="music.mp3";
 
 a.click();
 
